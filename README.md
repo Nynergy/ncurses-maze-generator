@@ -10,3 +10,9 @@ This little project was inspired by my desire to make a dungeon generator, and m
 ## Dependencies
 
 You will need to have ncurses installed on your machine. You can find out how to install it for your specific machine by looking online.
+
+---------------------------------------
+
+## Compilation and Execution
+
+To run the maze generator, first compile it with `make`, then either run `make run` or execute it manually with `./mazegen`.
