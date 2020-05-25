@@ -1,23 +1,20 @@
-#include <ncurses.h>
-
 #include <unistd.h>
 
-#include "Terminal.hpp"
-
-#define MIDHEIGHT	(LINES/2)
-#define MIDWIDTH	(COLS/2)
+#include "Maze.h"
+#include "Screen.h"
 
 int main() {
 
-	// Create Terminal object
-	Terminal terminal = Terminal();
+	// Create Screen and Maze objects
+	nce::Screen env = nce::Screen();
+	Maze maze = Maze();
 
 	nodelay(stdscr, TRUE);
 	int interrupt = 0;
 
 	while(true) {
 		// Create maze
-		interrupt = terminal.createMaze();
+		interrupt = maze.createMaze();
 
 		if(interrupt) {
 			break;
@@ -27,7 +24,7 @@ int main() {
 		usleep(1000000);
 
 		// Reset maze to be made again
-		terminal.resetMaze();
+		maze.resetMaze();
 	}
 
 	return 0;

@@ -13,7 +13,7 @@ enum {
 
 };
 
-class Terminal {
+class Maze {
 
 private:
 	int colorPair;
@@ -23,16 +23,14 @@ private:
 	int * cells;
 	int numVisited;
 	std::stack<std::pair<int, int>> path;
-	void setupScreen();
-	void cleanupScreen();
 	void populateCells();
 	void populateMaze();
 	void drawMaze();
 	
 public:
-	Terminal();
-	Terminal(const Terminal&);
-	~Terminal();
+	Maze();
+	Maze(const Maze&);
+	~Maze();
 	int createMaze();
 	void resetMaze();
 

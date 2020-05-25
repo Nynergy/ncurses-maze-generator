@@ -1,25 +1,59 @@
-BIN=mazegen
-CC=g++
-CFLAGS= -std=c++14 -g
-DEPEND= main.o Terminal.o
+### VARIABLES ###
+
+# Final target executable
+BIN := mazegen
+
+# Compiler
+CC := g++
+
+# Source and build output directories
+SRC_DIR := src
+OBJ_DIR := obj
+
+# List source files
+SRC := $(wildcard $(SRC_DIR)/*.cpp)
+
+# From source files, list object files
+OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
+# Pass preprocessor flags
+CPPFLAGS := -Iinclude # link include directory
+
+# Add compiler flags
+CFLAGS := -Wall
+
+# Add linker flags
+LDFLAGS := -Llib # link lib directory
+
+# Link against third party libraries
+LDLIBS := -lncurses -lnce
+
+### RECIPES ###
+
+# Indicate when a rule does not produce any target output
+.PHONY: all clean
 
 all: $(BIN)
 
-$(BIN): $(DEPEND)
-	$(CC) $(CFLAGS) $(DEPEND) -o $(BIN) -lncurses
+# Linking Phase
+$(BIN): $(OBJ)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-main.o: main.cpp Terminal.hpp
-	$(CC) main.cpp -c
+# Compiling Phase
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-Terminal.o: Terminal.cpp Terminal.hpp
-	$(CC) Terminal.cpp -c
+# If build directory does not exist, make it
+$(OBJ_DIR):
+	mkdir $@
+
+clean:
+	rm -rf $(OBJ_DIR)
+	rm -f $(BIN)
 
 run: all
 	./$(BIN)
 
+# Run executable with valgrind for memory leak analysis
 memcheck: all
-	valgrind ./$(BIN) -v
-
-clean:
-	rm -rf *.o
-	rm -rf $(BIN)
+	valgrind -v ./$(BIN)

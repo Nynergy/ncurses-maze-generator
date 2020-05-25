@@ -5,14 +5,12 @@
 
 #include <unistd.h>
 
-#include "Terminal.hpp"
+#include "Maze.h"
 
-Terminal::Terminal() {
+Maze::Maze() {
 
 	// Seed random number generator
 	srand(time(NULL));
-
-	this->setupScreen();
 
 	this->colorPair = (rand() % 5) + 1;
 
@@ -38,7 +36,7 @@ Terminal::Terminal() {
 
 }
 
-Terminal::Terminal(const Terminal& other) {
+Maze::Maze(const Maze& other) {
 
 	this->colorPair = other.colorPair;;
 
@@ -55,46 +53,13 @@ Terminal::Terminal(const Terminal& other) {
 
 }
 
-Terminal::~Terminal() {
+Maze::~Maze() {
 
 	delete[] this->cells;
 
-	this->cleanupScreen();
-
 }
 
-void Terminal::setupScreen() {
-
-	// Initialize curses environment
-	initscr();		// Begin curses mode
-	cbreak();		// Disable line buffering
-	keypad(stdscr, TRUE);	// Enable extra keys
-	noecho();		// Disable echoing keys to console
-	start_color();		// Begin color mode
-	curs_set(0);		// Set cursor to be invisible
-
-	// Initialize color pairs
-	use_default_colors();	// Enable transparency
-	init_pair(1, COLOR_GREEN, -1);
-	init_pair(2, COLOR_RED, -1);
-	init_pair(3, COLOR_YELLOW, -1);
-	init_pair(4, COLOR_BLUE, -1);
-	init_pair(5, COLOR_MAGENTA, -1);
-
-	return;
-
-}
-
-void Terminal::cleanupScreen() {
-
-	// Terminate curses environment
-	endwin();
-
-	return;
-
-}
-
-void Terminal::populateCells() {
+void Maze::populateCells() {
 
 	for(int i = 0; i < (this->mazeWidth * this->mazeHeight); i++) {
 		this->cells[i] = 0x00;
@@ -104,7 +69,7 @@ void Terminal::populateCells() {
 
 }
 
-int Terminal::createMaze() {
+int Maze::createMaze() {
 
 	// Populate the screen with unexcavated blocks
 	this->populateMaze();
@@ -184,7 +149,7 @@ int Terminal::createMaze() {
 
 }
 
-void Terminal::populateMaze() {
+void Maze::populateMaze() {
 
 	// Fill screen with uncarved blocks
 	for(int x = 0; x < (this->mazeWidth * 2); x++) {
@@ -200,7 +165,7 @@ void Terminal::populateMaze() {
 
 }
 
-void Terminal::drawMaze() {
+void Maze::drawMaze() {
 
 	// Draw cells and their connecting paths
 	for(int x = 0; x < this->mazeWidth; x++) {
@@ -229,7 +194,7 @@ void Terminal::drawMaze() {
 
 }
 
-void Terminal::resetMaze() {
+void Maze::resetMaze() {
 
 	this->populateCells();
 
