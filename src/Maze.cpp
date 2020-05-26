@@ -12,7 +12,7 @@ Maze::Maze() {
 	// Seed random number generator
 	srand(time(NULL));
 
-	this->colorPair = (rand() % 5) + 1;
+	this->colorPair = (rand() % 6) + 1;
 
 	this->mazeWidth = COLS / 2;
 	this->mazeHeight = LINES / 2;
@@ -21,17 +21,8 @@ Maze::Maze() {
 	this->populateCells();
 	this->numVisited = 0;
 
-	// Lambda function for calculating a cell's index
-	auto index = [&](int y, int x) {
-		int ret = (this->path.top().first + y) * this->mazeWidth + (this->path.top().second + x);
-		return ret;
-	};
-
-	int randX = rand() % this->mazeWidth;
-	int randY = rand() % this->mazeHeight;
-
-	this->path.push(std::make_pair(randY, randX));
-	this->cells[index(randY, randX)] = CELL_VISITED;
+	this->path.push(std::make_pair(0, 0));
+	this->cells[0] = CELL_VISITED;
 	this->numVisited++;
 
 }
@@ -136,8 +127,54 @@ int Maze::createMaze() {
 			this->path.pop();
 		}
 
+		//refresh();
+		//usleep(10000);
+		//this->drawMaze();
+
+		if(getch() != ERR) {
+			return 1;
+		}
+	}
+
+	// Lambda function for calculating the number of paths a cell has
+	auto numPaths = [&](int cell) {
+		int num = 0;
+		if(cell & CELL_PATH_N)
+			num++;
+		if(cell & CELL_PATH_E)
+			num++;
+		if(cell & CELL_PATH_S)
+			num++;
+		if(cell & CELL_PATH_W)
+			num++;
+		return num;
+	};
+
+	// Fill in dead ends
+	for(int i = 0; i < 50; i++) {
+		for(int j = 0; j < (this->mazeWidth * this->mazeHeight); j++) {
+			int cell = this->cells[j];
+			int connections = numPaths(cell);
+			if(connections == 1) {
+				// Cell is a dead end, so unvisit it and destroy path connection
+				if(cell & CELL_PATH_N) {
+					this->cells[j] = 0x00;
+					this->cells[j - this->mazeWidth] ^= CELL_PATH_S;
+				} else if(cell & CELL_PATH_E) {
+					this->cells[j] = 0x00;
+					this->cells[j + 1] ^= CELL_PATH_W;
+				} else if(cell & CELL_PATH_S) {
+					this->cells[j] = 0x00;
+					this->cells[j + this->mazeWidth] ^= CELL_PATH_N;
+				} else if(cell & CELL_PATH_W) {
+					this->cells[j] = 0x00;
+					this->cells[j - 1] ^= CELL_PATH_E;
+				}
+			}
+		}
+
 		refresh();
-		usleep(10000);
+		usleep(50000);
 		this->drawMaze();
 
 		if(getch() != ERR) {
@@ -179,13 +216,22 @@ void Maze::drawMaze() {
 				attroff(COLOR_PAIR(this->colorPair) | A_ALTCHARSET);
 			}
 
-			// Draw paths between cells if a path exists
-			if(this->cells[y * this->mazeWidth + x] & CELL_PATH_S) {
-				mvprintw(y * (this->pathWidth + 1) + 1, x * (this->pathWidth + 1), " ");
-			}
-
 			if(this->cells[y * this->mazeWidth + x] & CELL_PATH_E) {
 				mvprintw(y * (this->pathWidth + 1), x * (this->pathWidth + 1) + 1, " ");
+			} else {
+				attron(COLOR_PAIR(colorPair) | A_ALTCHARSET);
+				move(y * (this->pathWidth + 1), x * (this->pathWidth + 1) + 1);
+				addch(ACS_BLOCK);
+				attroff(COLOR_PAIR(colorPair) | A_ALTCHARSET);
+			}
+
+			if(this->cells[y * this->mazeWidth + x] & CELL_PATH_S) {
+				mvprintw(y * (this->pathWidth + 1) + 1, x * (this->pathWidth + 1), " ");
+			} else {
+				attron(COLOR_PAIR(colorPair) | A_ALTCHARSET);
+				move(y * (this->pathWidth + 1) + 1, x * (this->pathWidth + 1));
+				addch(ACS_BLOCK);
+				attroff(COLOR_PAIR(colorPair) | A_ALTCHARSET);
 			}
 		}
 	}
@@ -203,17 +249,8 @@ void Maze::resetMaze() {
 
 	this->numVisited = 0;
 
-	// Lambda function for calculating a cell's index
-	auto index = [&](int y, int x) {
-		int ret = (this->path.top().first + y) * this->mazeWidth + (this->path.top().second + x);
-		return ret;
-	};
-
-	int randX = rand() % this->mazeWidth;
-	int randY = rand() % this->mazeHeight;
-
-	this->path.push(std::make_pair(randY, randX));
-	this->cells[index(randY, randX)] = CELL_VISITED;
+	this->path.push(std::make_pair(0, 0));
+	this->cells[0] = CELL_VISITED;
 	this->numVisited++;
 
 	return;
